@@ -1,5 +1,5 @@
 {
-    "invalid_ticket_type_request": "Invalid request. Please select a valid ticket type.",
+    "invalid_ticket_type_request": "Invalid request.",
     "invalid_request": "Invalid ticket selection. Please review your request.",
     "seat_reservation_success": "Your seats have been successfully reserved. Total seats: {totalSeats}.",
     "payment_successful": "Payment completed successfully. Total amount paid: £{totalCost}.",

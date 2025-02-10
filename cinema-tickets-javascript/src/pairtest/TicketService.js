@@ -3,18 +3,20 @@ import InvalidPurchaseException from './lib/InvalidPurchaseException.js';
 import { ticketCategories, ticketCost } from './config/TicketsConfig.js';
 import messages from './utils/messages/messages.json' with { type: 'json' };
 import logger from './utils/logger/logger.js';
+import SnowflakeIDGenerator from './utils/Snowflake/SnowflakeIDGenerator.js'
+
 
 export default class TicketService {
-  constructor(ticketValidator, ticketPaymentService, seatReservationService) {
+  constructor(ticketValidator, ticketPaymentService, seatReservationService, machineId = 1) {
     this.ticketValidator = ticketValidator;
     this.ticketPaymentService = ticketPaymentService;
     this.seatReservationService = seatReservationService;
+    this.snowflakeGenerator = new SnowflakeIDGenerator(machineId);
   }
 
   #calculateTotalCost(ticketRequests) {
     return ticketRequests.reduce((totalCost, request) => {
       if (!(request instanceof TicketTypeRequest)) {
-        // Assumption: JSON.stringify(request) will never throw error.
         logger.error(`${messages.invalid_ticket_type_request}: ${JSON.stringify(request)}`);
         throw new TypeError(messages.invalid_request);
       }
@@ -28,7 +30,6 @@ export default class TicketService {
     return ticketRequests
       .filter(request => {
         if (!(request instanceof TicketTypeRequest)) {
-          // Assumption: JSON.stringify(request) will never throw error.
           logger.error(`${messages.invalid_ticket_type_request}: ${JSON.stringify(request)}`);
           throw new TypeError(messages.invalid_request);
         }
@@ -38,9 +39,16 @@ export default class TicketService {
   }
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
+    const transactionId = this.snowflakeGenerator.generateId();
+    logger.info(`Transaction ID: ${transactionId} - Account ID: ${accountId}`);
+    if (accountId <= 0) {
+      logger.error(`Transaction ID: ${transactionId} - ${messages.invalid_ticket_type_request}: Invalid accountId: ${accountId}`);
+      throw new TypeError(messages.invalid_request);
+    }
+
     const ticketSummary = ticketTypeRequests.reduce((acc, request) => {
       if (!(request instanceof TicketTypeRequest)) {
-        logger.error(`${messages.invalid_ticket_type_request}: ${JSON.stringify(request)}`);
+        logger.error(`Transaction ID: ${transactionId} - ${messages.invalid_ticket_type_request}: ${JSON.stringify(request)}`);
         throw new TypeError(messages.invalid_request);
       }
       const ticketType = request.getTicketType();
@@ -56,41 +64,39 @@ export default class TicketService {
 
     try {
       const totalSeats = this.#calculateTotalSeats(ticketTypeRequests);
-
+      logger.info(`Transaction ID: ${transactionId} - Account ID: ${accountId} - Total Seats: ${totalSeats}`);
       // Reserve seats first to ensure availability before proceeding with payment.
       // This prevents scenarios where users pay but later find out that the seat is unavailable.
       this.seatReservationService.reserveSeat(accountId, totalSeats);
-
-      logger.info(`${messages.seat_reservation_successful} ${totalSeats}`);
+      logger.info(`Transaction ID: ${transactionId} - ${messages.seat_reservation_successful} ${totalSeats}`);
 
       try {
         const totalCost = this.#calculateTotalCost(ticketTypeRequests);
         this.ticketPaymentService.makePayment(accountId, totalCost);
 
-        logger.info(`${messages.payment_successful} ${totalCost}`);
+        logger.info(`Transaction ID: ${transactionId} - ${messages.payment_successful} ${totalCost}`);
+        
+        // Returning a structured response
+        return {
+          message: "Purchase successful",
+          transactionId: transactionId
+        };
       } catch (paymentError) {
         if (paymentError instanceof TypeError) {
-          logger.error(`Payment Error: ${paymentError.message}`);
+          logger.error(`Transaction ID: ${transactionId} - Payment Error: ${paymentError.message}`);
           // Assumption: Standardizing the error format and also as third-party errors can sometimes be ambiguous
           throw new InvalidPurchaseException(messages.payment_error);
         }
 
-        logger.warn(`Payment Error: ${paymentError.message}`);
+        logger.error(`Transaction ID: ${transactionId} - Payment Error: ${paymentError.message}`);
 
-        // If payment fails, implement rollback for seat reservation or retry payment.
-        // Optionally, if the amount is debited, notify the customer to wait before retrying.
-
+        // Assumption: For a valid request, payment processing is always expected to succeed. 
+        // Therefore, retrying payments or handling refunds is not required.
         throw new InvalidPurchaseException(messages.payment_error);
       }
     } catch (seatError) {
-      if (seatError instanceof TypeError) {
-        logger.error(`Seat Reservation Error: ${seatError.message}`);
-        throw new InvalidPurchaseException(messages.seat_reservation_error);
-      }
-
-      // Assumption: This error occurs due to valid conditions, such as seat unavailability and may even be third-party server or network failures
-      logger.warn(`Seat Reservation Error: ${seatError.message}`);
-      throw new InvalidPurchaseException(messages.seat_reservation_failed);
+      logger.error(`Transaction ID: ${transactionId} - Seat Reservation Error: ${seatError.message}`);
+      throw new InvalidPurchaseException(messages.seat_reservation_error);
     }
   }
 }
