@@ -1,13 +1,16 @@
 {
-    "invalid_ticket_type_request": "Invalid request.",
-    "invalid_request": "Invalid ticket selection. Please review your request.",
-    "seat_reservation_success": "Your seats have been successfully reserved. Total seats: {totalSeats}.",
-    "payment_successful": "Payment completed successfully. Total amount paid: £{totalCost}.",
-    "payment_error": "Payment failed. Please try again later or contact support if the issue persists.",
-    "seat_reservation_failed": "We couldn't reserve your seats. Please try again later.",
-    "min_number_tickets_err": "You must purchase at least one ticket to proceed.",
-    "error_infant_only_not_allowed": "Infants must be accompanied by at least one child or adult.",
-    "seat_reservation_error": "Seat reservation encountered an issue. Please try again later.",
-    "error_infant_exceeds_allowed": "The number of infant tickets cannot exceed the combined number of adult and child tickets.",
-    "max_allowed_tickets_err": "You can only purchase up to {allowedTickets} tickets per order."
+  "invalid_ticket_type_request": "Invalid request.",
+  "invalid_request": "Invalid ticket selection. Please review your request.",
+  "seat_reservation_success": "Your seats have been successfully reserved. Total seats: {totalSeats}.",
+  "payment_successful": "Payment completed successfully. Total amount paid: £{totalCost}.",
+  "payment_error": "Payment failed. Please try again later or contact support if the issue persists.",
+  "seat_reservation_failed": "We couldn't reserve your seats. Please try again later.",
+  "min_number_tickets_err": "You must purchase at least one ticket to proceed.",
+  "error_adult_required": "Infants and children must be accompanied by at least one adult.",
+  "seat_reservation_error": "Seat reservation encountered an issue. Please try again later.",
+  "error_too_many_infants": "The number of infant tickets cannot exceed the combined number of adult tickets.",
+  "duplicate_ticket_type_error":"Duplicate ticket types are not allowed.",
+  "max_allowed_tickets_err": "You can only purchase up to {allowedTickets} tickets per order.",
+  "seat_reservation_successful":"Seat reservation is successful",
+  "purchase_successful": "Purchase successful"
 }

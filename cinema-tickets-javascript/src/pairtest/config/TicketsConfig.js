@@ -1,11 +1,11 @@
 const ticketCategories = Object.freeze({
-  INFANT: 'INFANT',
-  CHILD: 'CHILD',
-  ADULT: 'ADULT',
+  INFANT: "INFANT",
+  CHILD: "CHILD",
+  ADULT: "ADULT",
 });
 
 const ticketRules = Object.freeze({
-  MAX_TICKETS_PER_ORDER: 25
+  MAX_TICKETS_PER_ORDER: 25,
 });
 
 const ticketCost = Object.freeze({

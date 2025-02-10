@@ -4,7 +4,7 @@ import path from "path";
 const logDirectory = path.join(process.cwd(), "logs");
 
 // Disable logging in test environment
-const isTestEnv = process.env.NODE_ENV === "test";
+const isTestEnv = process.env.NODE_ENV === "dev";
 
 // Create a Winston logger
 const logger = winston.createLogger({
