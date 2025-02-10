@@ -1,7 +1,6 @@
-import {
-  ticketRules,
-} from './config/TicketsConfig.js';
-import messages from './utils/messages/messages.json' with { type: 'json' };
+import {ticketRules} from '../../config/TicketsConfig.js';
+import messages from '../messages/messages.json' with { type: 'json' };
+import InvalidPurchaseException from '../../lib/InvalidPurchaseException.js';
 
 export default class TicketValidator {
   /**
@@ -29,7 +28,7 @@ export default class TicketValidator {
 
     if (totalTickets > ticketRules.MAX_TICKETS_PER_ORDER) {
       throw new InvalidPurchaseException(
-        messages.max_allowed_tickets_err.replace('{allowedTickets}', totalNoOfTickets)
+        messages.max_allowed_tickets_err.replace('{allowedTickets}', ticketRules.MAX_TICKETS_PER_ORDER)
       );
     }
   }
@@ -66,5 +65,4 @@ export default class TicketValidator {
     this.#checkTicketCount(ticketRequests);
     this.#verifyTicketRules(ticketRequests);
   }
-
 }

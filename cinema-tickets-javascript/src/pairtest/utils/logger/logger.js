@@ -9,7 +9,6 @@ const isTestEnv = process.env.NODE_ENV === "test";
 // Create a Winston logger
 const logger = winston.createLogger({
   level: isTestEnv ? "silent" : "info", // Disable logs in test mode
-  level: "info", // Default Log Level
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {
