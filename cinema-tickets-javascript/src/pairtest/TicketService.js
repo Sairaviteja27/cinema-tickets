@@ -11,7 +11,7 @@ export default class TicketService {
    * Initializes a new instance of the TicketService.
    * @param {Object} ticketPaymentService - Service for handling ticket payments.
    * @param {Object} seatReservationService - Service for handling seat reservations.
-   * @param {number} [machineId=1] - ID for the Snowflake ID generator.
+   * @param {number} [machineId=1] - Machine ID for the Snowflake ID generator.
    */
   constructor(ticketPaymentService, seatReservationService, machineId = 1) {
     this.ticketPaymentService = ticketPaymentService;
@@ -66,8 +66,6 @@ export default class TicketService {
       if (obj === undefined) return "undefined";
       if (obj === null) return "null";
       if (Array.isArray(obj) && obj.length === 0) return "[] (empty array)";
-
-      //Assuming JSON.stringify never fails for the data
       return JSON.stringify(obj);
     } catch (error) {
       return "[Unserializable Object]";
@@ -145,6 +143,7 @@ export default class TicketService {
       throw new InvalidPurchaseException(messages.error_adult_required);
     }
 
+    //Validation: Infants will be sitting on an Adult's lap
     if (infantCount > adultCount) {
       throw new InvalidPurchaseException(messages.error_too_many_infants);
     }
@@ -182,9 +181,7 @@ export default class TicketService {
     try {
       const totalSeats = this.#calculateTotalSeats(ticketTypeRequests);
 
-      logger.info(`Transaction ID: ${transactionId} - Account ID: ${accountId} - Total Seats: ${totalSeats}`);
-
-      // Reserve seats first to ensure availability before proceeding with payment.
+      // Reserving seats first to ensure availability before proceeding with payment.
       // This prevents scenarios where users pay but later find out that the seat is unavailable.
       this.seatReservationService.reserveSeat(accountId, totalSeats);
       logger.info(`Transaction ID: ${transactionId} - ${messages.seat_reservation_successful} - Total Seats Reserved: ${totalSeats}`);

@@ -3,8 +3,8 @@ import path from "path";
 
 const logDirectory = path.join(process.cwd(), "logs");
 
-// Disable logging in test environment
-const isTestEnv = process.env.NODE_ENV === "dev";
+// Disable logging in test environment.
+const isTestEnv = process.env.NODE_ENV === "test";
 
 // Create a Winston logger
 const logger = winston.createLogger({
@@ -19,7 +19,7 @@ const logger = winston.createLogger({
     ? [new winston.transports.Stream({ stream: new (require("stream").Writable)(), level: "silent" })]
     : [
       new winston.transports.Console(),
-      // Logging to files to simulate real-world error tracking via persistent storage
+      // Logging to files to simulate real-world error tracking via tools / persistent storage
       new winston.transports.File({ filename: path.join(logDirectory, "error.log"), level: "error" }),
 
       new winston.transports.File({ filename: path.join(logDirectory, "info.log"), level: "info" }),

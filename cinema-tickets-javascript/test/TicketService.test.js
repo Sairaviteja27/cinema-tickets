@@ -131,7 +131,6 @@ describe('TicketService Tests', () => {
   test('should throw error for invalid account ID', () => {
     const accountId = 0; // Invalid account ID
     const tickets = [new TicketTypeRequest(ticketCategories.ADULT, 1)];
-
     try {
       ticketService.purchaseTickets(accountId, ...tickets);
     } catch (error) {
@@ -140,16 +139,24 @@ describe('TicketService Tests', () => {
     }
   });
 
+  test("should throw an error for invalid ticket type", () => {
+    expect(() => new TicketTypeRequest("INVALID_TYPE", 3)).toThrow(TypeError);
+  });
+
+  test("should throw an error for invalid no of tickets", () => {
+    expect(() => new TicketTypeRequest(ticketCategories.ADULT, 1.25)).toThrow(TypeError);
+  });
+
   test('should throw error for invalid TicketTypeRequest instance', () => {
     const accountId = 1;
     const invalidRequest = { ticketType: ticketCategories.ADULT, noOfTickets: 2 };
 
-    expect(() => {
+    try {
       ticketService.purchaseTickets(accountId, invalidRequest);
-    }).toThrow(TypeError);
-
-    expect(() => ticketService.purchaseTickets(accountId, invalidRequest))
-      .toThrowError(new TypeError(messages.invalid_request));
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error.message).toBe(messages.invalid_request);
+    }
   });
 
   test('should throw error for too many infants without enough adults', () => {
