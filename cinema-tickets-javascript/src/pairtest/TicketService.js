@@ -177,6 +177,9 @@ export default class TicketService {
 
     this.#verifyTicketOrder(ticketSummary);
 
+    // The test assumptions states that seat reservation and payment processing always succeeds,
+    //  but try-catch blocks are included for defensive programming and better logging. 
+
     // ─── Seat Reservation Logic ────────────────────────────────────────────
     try {
       const totalSeats = this.#calculateTotalSeats(ticketTypeRequests);
