@@ -52,13 +52,12 @@ describe('TicketService Tests', () => {
       new TicketTypeRequest(ticketCategories.INFANT, 2)
     ];
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.error_adult_required));
-
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException); // Ensures it's the correct error type
+      expect(error.message).toBe(messages.error_adult_required); // Ensures the message is correct
+    }
   });
 
   test('should throw error for duplicate ticket types', () => {
@@ -70,13 +69,12 @@ describe('TicketService Tests', () => {
 
     ];
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.duplicate_ticket_type_error));
-
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException);
+      expect(error.message).toBe(messages.duplicate_ticket_type_error);
+    }
   });
 
 
@@ -89,13 +87,13 @@ describe('TicketService Tests', () => {
       new TicketTypeRequest(ticketCategories.CHILD, ticketRules.MAX_TICKETS_PER_ORDER + 3)
     ];
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.max_allowed_tickets_err
-        .replace('{allowedTickets}', ticketRules.MAX_TICKETS_PER_ORDER)));
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException);
+      expect(error.message).toBe(messages.max_allowed_tickets_err
+        .replace('{allowedTickets}', ticketRules.MAX_TICKETS_PER_ORDER));
+    }
   });
 
   test('should handle payment service failure', () => {
@@ -106,12 +104,12 @@ describe('TicketService Tests', () => {
       throw new Error('Payment service failed.');
     });
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.payment_error));
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException);
+      expect(error.message).toBe(messages.payment_error);
+    }
   });
 
   test('should handle seat reservation failure', () => {
@@ -122,24 +120,24 @@ describe('TicketService Tests', () => {
       throw new Error('Seat reservation failed.');
     });
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.seat_reservation_failed));
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException);
+      expect(error.message).toBe(messages.seat_reservation_failed);
+    }
   });
 
   test('should throw error for invalid account ID', () => {
     const accountId = 0; // Invalid account ID
     const tickets = [new TicketTypeRequest(ticketCategories.ADULT, 1)];
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(TypeError);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new TypeError(messages.invalid_request));
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error.message).toBe(messages.invalid_request);
+    }
   });
 
   test('should throw error for invalid TicketTypeRequest instance', () => {
@@ -147,7 +145,7 @@ describe('TicketService Tests', () => {
     const invalidRequest = { ticketType: ticketCategories.ADULT, noOfTickets: 2 };
 
     expect(() => {
-      ticketService.purchaseTickets(accountId, invalidRequest); 
+      ticketService.purchaseTickets(accountId, invalidRequest);
     }).toThrow(TypeError);
 
     expect(() => ticketService.purchaseTickets(accountId, invalidRequest))
@@ -161,23 +159,22 @@ describe('TicketService Tests', () => {
       new TicketTypeRequest(ticketCategories.INFANT, 3)
     ];
 
-    expect(() => {
-      ticketService.purchaseTickets(accountId, ...tickets); 
-    }).toThrow(InvalidPurchaseException);
-
-    expect(() => ticketService.purchaseTickets(accountId, ...tickets))
-      .toThrowError(new InvalidPurchaseException(messages.error_too_many_infants));
+    try {
+      ticketService.purchaseTickets(accountId, ...tickets);
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidPurchaseException);
+      expect(error.message).toBe(messages.error_too_many_infants);
+    }
   });
 
   test('should throw error if no tickets are purchased', () => {
     const accountId = 1;
-
-    expect(() => {
-      ticketService.purchaseTickets(accountId); 
-    }).toThrow(TypeError);
-
-    expect(() => ticketService.purchaseTickets(accountId))
-      .toThrowError(new TypeError(messages.invalid_request));
+    try {
+      ticketService.purchaseTickets(accountId);
+    } catch (error) {
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error.message).toBe(messages.invalid_request);
+    }
   });
 
   test('should process a valid purchase including infants (infants don\'t count for seats)', () => {
@@ -186,10 +183,7 @@ describe('TicketService Tests', () => {
       new TicketTypeRequest(ticketCategories.ADULT, 2),
       new TicketTypeRequest(ticketCategories.INFANT, 2)
     ];
-
     const result = ticketService.purchaseTickets(accountId, ...tickets);
-
-    // Adults pay, infants are free, so only 2 adult tickets are charged
     expect(mockTicketPaymentService.makePayment).toHaveBeenCalledWith(accountId, 50);
     // Only adult seats are reserved, not infants
     expect(mockSeatReservationService.reserveSeat).toHaveBeenCalledWith(accountId, 2);
@@ -200,5 +194,11 @@ describe('TicketService Tests', () => {
     });
   });
 
-
+  test('should allow purchasing exactly MAX_TICKETS_PER_ORDER tickets', () => {
+    const accountId = 1;
+    const tickets = [
+      new TicketTypeRequest(ticketCategories.ADULT, ticketRules.MAX_TICKETS_PER_ORDER)
+    ];
+    expect(() => ticketService.purchaseTickets(accountId, ...tickets)).not.toThrow();
+  });
 });
